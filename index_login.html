@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRMS Dashboard</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#1f2937}
+.app{display:flex;min-height:100vh}.sidebar{width:245px;background:#123b63;color:white;padding:22px 14px;position:fixed;left:0;top:0;bottom:0}
+.logo{font-size:20px;font-weight:700;padding:0 12px 25px}.logo span{color:#58c7d9}
+.nav button{width:100%;border:0;background:transparent;color:#dbeafe;text-align:left;padding:13px 14px;margin:3px 0;border-radius:9px;font-size:15px;cursor:pointer}
+.nav button:hover,.nav button.active{background:#1d5a8e;color:#fff}.main{margin-left:245px;flex:1;padding:25px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.top h1{margin:0;font-size:27px}.user{background:white;padding:10px 15px;border-radius:10px;box-shadow:0 2px 10px #0000000d}
+.page{display:none}.page.active{display:block}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.card{background:#fff;border-radius:14px;padding:19px;box-shadow:0 3px 12px #0000000b}.card small{color:#6b7280}.num{font-size:28px;font-weight:700;margin-top:9px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.panel{background:#fff;border-radius:14px;padding:20px;box-shadow:0 3px 12px #0000000b;margin-bottom:20px}
+.panel h2{font-size:18px;margin-top:0}.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.quick button{padding:18px;border:1px solid #dbe3ec;background:#f8fafc;border-radius:10px;cursor:pointer;font-weight:600}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form .full{grid-column:1/-1}label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}input,select,textarea{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}textarea{min-height:90px}
+.primary{background:#1769aa;color:#fff;border:0;padding:11px 17px;border-radius:8px;cursor:pointer;font-weight:600}.secondary{background:#eef2f7;color:#1f2937;border:0;padding:11px 17px;border-radius:8px;cursor:pointer}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:11px;border-bottom:1px solid #e5e7eb;font-size:13px}th{background:#f8fafc}
+.search{display:flex;gap:10px;margin-bottom:15px}.search input{flex:1}.badge{padding:5px 8px;border-radius:20px;background:#e8f5e9;color:#28743e;font-size:12px}
+.notice{padding:12px;border-radius:9px;background:#eef7ff;color:#15517d;margin-bottom:15px}
+@media(max-width:900px){.sidebar{width:70px}.logo{font-size:0}.logo span{font-size:18px}.nav button{font-size:0;text-align:center}.main{margin-left:70px}.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
+@media(max-width:600px){.main{padding:15px}.cards,.quick,.form{grid-template-columns:1fr}.form .full{grid-column:auto}}
+
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#123b63,#1769aa);padding:20px}
+.login-box{width:100%;max-width:390px;background:#fff;border-radius:16px;padding:30px;box-shadow:0 10px 35px #0003}
+.login-box h1{margin:0 0 8px;text-align:center;color:#123b63;font-size:25px}
+.login-box p{text-align:center;color:#6b7280;margin:0 0 25px}
+.login-box label{margin-top:12px}
+.login-box input{margin-bottom:4px}
+.login-btn{width:100%;margin-top:18px;background:#1769aa;color:#fff;border:0;padding:12px;border-radius:8px;cursor:pointer;font-weight:700;font-size:15px}
+.login-error{display:none;color:#b91c1c;background:#fee2e2;padding:10px;border-radius:8px;margin-top:12px;text-align:center;font-size:13px}
+.logout{margin-left:8px;background:#b91c1c!important;color:#fff!important}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <h1>Digital DRMS</h1>
+    <p>Digital Records Management System</p>
+    <form onsubmit="login(event)">
+      <label for="loginUser">Username</label>
+      <input id="loginUser" type="text" placeholder="Enter username" autocomplete="username" required>
+      <label for="loginPass">Password</label>
+      <input id="loginPass" type="password" placeholder="Enter password" autocomplete="current-password" required>
+      <button class="login-btn" type="submit">Login</button>
+      <div id="loginError" class="login-error">Invalid username or password.</div>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="app" style="display:none">
+<aside class="sidebar">
+<div class="logo">Digital <span>DRMS</span></div>
+<div class="nav">
+<button class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</button>
+<button onclick="showPage('register',this)">📝 Register</button>
+<button onclick="showPage('scanner',this)">📷 Scanner</button>
+<button onclick="showPage('records',this)">🗂 Records</button>
+<button onclick="showPage('search',this)">🔎 Search</button>
+<button onclick="showPage('documents',this)">📄 Documents</button>
+<button onclick="showPage('reports',this)">📊 Taarifa za Jumla</button>
+</div>
+</aside>
+
+<main class="main">
+<div class="top"><h1 id="title">Dashboard</h1><div class="user">Authorized User <button class="logout" onclick="logout()">Logout</button></div></div>
+
+<section id="dashboard" class="page active">
+<div class="cards">
+<div class="card"><small>Total Records</small><div class="num" id="totalRecords">0</div></div>
+<div class="card"><small>Registered Today</small><div class="num" id="todayRecords">0</div></div>
+<div class="card"><small>Documents</small><div class="num" id="totalDocs">0</div></div>
+<div class="card"><small>Pending</small><div class="num" id="pendingRecords">0</div></div>
+</div>
+<div class="panel"><h2>Quick Actions</h2><div class="quick">
+<button onclick="showPage('register')">📝 Register Record</button>
+<button onclick="showPage('scanner')">📷 Scan Document</button>
+<button onclick="showPage('search')">🔎 Search Record</button>
+</div></div>
+<div class="grid">
+<div class="panel"><h2>Recent Records</h2><table><thead><tr><th>Ref No.</th><th>Title</th><th>Status</th></tr></thead><tbody id="recentTable"></tbody></table></div>
+<div class="panel"><h2>System Information</h2><p>Digital Records Management System (DRMS)</p><p>Use the menu to register, scan, search and manage records.</p><span class="badge">System Active</span></div>
+</div>
+</section>
+
+<section id="register" class="page">
+<div class="panel"><h2>Register New Record</h2><div class="notice">Enter the record details below. The record will be saved in this browser for demonstration.</div>
+<div class="form">
+<div><label>Reference Number</label><input id="ref" placeholder="e.g. DRMS/2026/001"></div>
+<div><label>Record Title</label><input id="recordTitle" placeholder="Enter record title"></div>
+<div><label>Department</label><select id="dept"><option>Registry</option><option>Human Resources</option><option>Finance</option><option>Administration</option><option>Other</option></select></div>
+<div><label>Record Type</label><select id="type"><option>Official Correspondence</option><option>Personnel Record</option><option>Financial Record</option><option>Administrative Record</option><option>Other</option></select></div>
+<div><label>Date</label><input id="date" type="date"></div>
+<div><label>Status</label><select id="status"><option>Active</option><option>Pending</option><option>Closed</option></select></div>
+<div class="full"><label>Description</label><textarea id="desc" placeholder="Brief description"></textarea></div>
+<div class="full"><button class="primary" onclick="registerRecord()">Save Record</button></div>
+</div></div>
+</section>
+
+<section id="scanner" class="page">
+<div class="panel"><h2>Document Scanner</h2><div class="notice">Demo scanner area. Choose a document from your device to attach it to a record.</div>
+<input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+<br><br><button class="primary" onclick="scanDocument()">Add to Documents</button>
+<p id="scanMsg"></p></div>
+</section>
+
+<section id="records" class="page">
+<div class="panel"><h2>Records</h2><table><thead><tr><th>Reference</th><th>Title</th><th>Department</th><th>Date</th><th>Status</th></tr></thead><tbody id="recordsTable"></tbody></table></div>
+</section>
+
+<section id="search" class="page">
+<div class="panel"><h2>Search Records</h2><div class="search"><input id="searchBox" oninput="searchRecords()" placeholder="Search reference, title, department..."></div>
+<table><thead><tr><th>Reference</th><th>Title</th><th>Department</th><th>Status</th></tr></thead><tbody id="searchTable"></tbody></table></div>
+</section>
+
+<section id="documents" class="page">
+<div class="panel"><h2>Documents</h2><table><thead><tr><th>Document</th><th>Added</th><th>Type</th></tr></thead><tbody id="docsTable"></tbody></table></div>
+</section>
+
+<section id="reports" class="page">
+<div class="cards">
+<div class="card"><small>Total Records</small><div class="num" id="rTotal">0</div></div>
+<div class="card"><small>Active</small><div class="num" id="rActive">0</div></div>
+<div class="card"><small>Pending</small><div class="num" id="rPending">0</div></div>
+<div class="card"><small>Closed</small><div class="num" id="rClosed">0</div></div>
+</div>
+<div class="panel"><h2>General Information</h2><p><b>System:</b> Digital Records Management System (DRMS)</p><p><b>Purpose:</b> Registration, digitization, storage, retrieval and monitoring of records.</p><p><b>Access:</b> Authorized users only.</p></div>
+</section>
+</main>
+</div>
+
+<script>
+
+const LOGIN_USERNAME = 'admin';
+const LOGIN_PASSWORD = '1234';
+
+function login(event){
+  event.preventDefault();
+  const user=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const error=document.getElementById('loginError');
+
+  if(user===LOGIN_USERNAME && pass===LOGIN_PASSWORD){
+    sessionStorage.setItem('drms_logged_in','true');
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    error.style.display='none';
+    update();
+  }else{
+    error.style.display='block';
+  }
+}
+
+function logout(){
+  sessionStorage.removeItem('drms_logged_in');
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginError').style.display='none';
+}
+
+function checkLogin(){
+  if(sessionStorage.getItem('drms_logged_in')==='true'){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='flex';
+  }else{
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('app').style.display='none';
+  }
+}
+
+let records=JSON.parse(localStorage.getItem('drms_records')||'[]');
+let docs=JSON.parse(localStorage.getItem('drms_docs')||'[]');
+function save(){localStorage.setItem('drms_records',JSON.stringify(records));localStorage.setItem('drms_docs',JSON.stringify(docs));update();}
+function showPage(id,btn){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+ if(btn)btn.classList.add('active');
+ const names={dashboard:'Dashboard',register:'Register Record',scanner:'Document Scanner',records:'Records',search:'Search Records',documents:'Documents',reports:'Taarifa za Jumla'};
+ document.getElementById('title').textContent=names[id]||'Dashboard'; update();
+}
+function registerRecord(){
+ const ref=document.getElementById('ref').value.trim(), title=document.getElementById('recordTitle').value.trim();
+ if(!ref||!title){alert('Please enter Reference Number and Record Title.');return;}
+ records.unshift({ref,title,dept:dept.value,type:type.value,date:date.value||new Date().toISOString().slice(0,10),status:status.value,desc:desc.value});
+ save(); alert('Record registered successfully.');
+ ['ref','recordTitle','desc'].forEach(x=>document.getElementById(x).value='');
+}
+function scanDocument(){
+ const f=document.getElementById('fileInput').files[0]; if(!f){alert('Choose a document first.');return;}
+ docs.unshift({name:f.name,date:new Date().toLocaleDateString(),type:f.type||'Document'}); save();
+ document.getElementById('scanMsg').textContent='Document added successfully: '+f.name;
+ document.getElementById('fileInput').value='';
+}
+function rows(list,full=false){
+ return list.length?list.map(r=>full?`<tr><td>${r.ref}</td><td>${r.title}</td><td>${r.dept}</td><td>${r.date}</td><td><span class="badge">${r.status}</span></td></tr>`:`<tr><td>${r.ref}</td><td>${r.title}</td><td><span class="badge">${r.status}</span></td></tr>`).join(''):'<tr><td colspan="5">No records yet.</td></tr>';
+}
+function searchRecords(){
+ const q=document.getElementById('searchBox').value.toLowerCase();
+ const list=records.filter(r=>(r.ref+' '+r.title+' '+r.dept+' '+r.type).toLowerCase().includes(q));
+ document.getElementById('searchTable').innerHTML=rows(list,true);
+}
+function update(){
+ document.getElementById('totalRecords').textContent=records.length;
+ document.getElementById('todayRecords').textContent=records.filter(r=>r.date===new Date().toISOString().slice(0,10)).length;
+ document.getElementById('totalDocs').textContent=docs.length;
+ document.getElementById('pendingRecords').textContent=records.filter(r=>r.status==='Pending').length;
+ document.getElementById('recentTable').innerHTML=rows(records.slice(0,5));
+ document.getElementById('recordsTable').innerHTML=rows(records,true);
+ document.getElementById('searchTable').innerHTML=rows(records,true);
+ document.getElementById('docsTable').innerHTML=docs.length?docs.map(d=>`<tr><td>${d.name}</td><td>${d.date}</td><td>${d.type}</td></tr>`).join(''):'<tr><td colspan="3">No documents yet.</td></tr>';
+ document.getElementById('rTotal').textContent=records.length;
+ document.getElementById('rActive').textContent=records.filter(r=>r.status==='Active').length;
+ document.getElementById('rPending').textContent=records.filter(r=>r.status==='Pending').length;
+ document.getElementById('rClosed').textContent=records.filter(r=>r.status==='Closed').length;
+}
+checkLogin();
+update();
+</script>
+</body>
+</html>
